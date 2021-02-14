@@ -1,17 +1,23 @@
 package env
 
-import "github.com/dimfeld/httptreemux/v5"
+import (
+	"log"
+
+	"github.com/dimfeld/httptreemux/v5"
+)
 
 // Env defines the local app context and holds global
-// dependencies
+// dependencies.
 type Env struct {
+	Log    *log.Logger
 	Router *httptreemux.ContextMux
 }
 
 // New creates a new pointer to an Env struct.
-func New() *Env {
+func New(log *log.Logger) *Env {
 	router := httptreemux.NewContextMux()
 	return &Env{
+		Log:    log,
 		Router: router,
 	}
 }

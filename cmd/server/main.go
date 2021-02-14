@@ -26,7 +26,7 @@ func run(log *log.Logger) error {
 	flag.Parse()
 
 	// initialize gloabl dependencies
-	env := env.New()
+	env := env.New(log)
 
 	router := transportHTTP.New(env)
 
