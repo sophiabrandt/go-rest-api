@@ -7,7 +7,7 @@ import (
 	"github.com/sophiabrandt/go-rest-api/internal/env"
 )
 
-func HandleHealth(e *env.Env, w http.ResponseWriter, r *http.Request) error {
+func Health(e *env.Env, w http.ResponseWriter, r *http.Request) error {
 	status := "ok"
 	statusCode := http.StatusOK
 	health := struct {

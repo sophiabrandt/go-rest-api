@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
+	"github.com/sophiabrandt/go-rest-api/internal/adapter/database"
 	"github.com/sophiabrandt/go-rest-api/internal/env"
 	"github.com/sophiabrandt/go-rest-api/internal/server"
 	transportHTTP "github.com/sophiabrandt/go-rest-api/internal/transport/http"
@@ -25,8 +26,15 @@ func run(log *log.Logger) error {
 	addr := flag.String("addr", "0.0.0.0:4000", "Http network address")
 	flag.Parse()
 
+	// databse
+	db, err := database.New()
+	if err != nil {
+		return errors.Wrap(err, "could not start server")
+	}
+	defer db.Close()
+
 	// initialize gloabl dependencies
-	env := env.New(log)
+	env := env.New(log, db)
 
 	router := transportHTTP.New(env)
 
