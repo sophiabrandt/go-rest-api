@@ -33,7 +33,7 @@ func run(log *log.Logger) error {
 	}
 	defer db.Close()
 
-	// initialize gloabl dependencies
+	// initialize global dependencies
 	env := env.New(log, db)
 
 	router := transportHTTP.New(env)

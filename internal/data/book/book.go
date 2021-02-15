@@ -1,8 +1,6 @@
 package book
 
 import (
-	"time"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -14,12 +12,13 @@ type RepositoryDb struct {
 
 // Info is the book model.
 type Info struct {
-	ID            string    `db:"book_id" json:"book_id"`
-	Title         string    `db:"title" json:"title"`
-	Author        string    `db:"author" json:"book"`
-	PublishedDate time.Time `db:published_date" json:"published_date"`
-	ImageUrl      string    `db:"image_url" json:"image_url"`
-	Description   string    `db:"description" json:"description"`
+	ID            string `db:"book_id" json:"book_id"`
+	AuthorID      string `db:"author_id" json:"author_id,omitempty"`
+	AuthorName    string `db:"author_name" json:"author_name"`
+	Title         string `db:"title" json:"title"`
+	PublishedDate string `db:"published_date" json:"published_date"`
+	ImageUrl      string `db:"image_url" json:"image_url"`
+	Description   string `db:"description" json:"description"`
 }
 
 // Repo is the interface for the book repository.
@@ -35,9 +34,13 @@ func New(db *sqlx.DB) *RepositoryDb {
 // Query retrieves all books from the database.
 func (r *RepositoryDb) Query() ([]Info, error) {
 	const q = `
-	SELECT b.*
+	SELECT
+		b.book_id, b.title, b.published_date, b.image_url, b.description,
+		a.name AS author_name
 	FROM books as b
-	ORDER BY book_id
+	LEFT JOIN
+		authors AS a ON b.author_id = a.author_id
+	ORDER BY b.book_id
 	`
 	books := []Info{}
 	if err := r.DB.Select(&books, q); err != nil {

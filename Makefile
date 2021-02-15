@@ -24,3 +24,12 @@ deps-upgrade:
 
 deps-cleancache:
 	go clean -modcache
+
+# ==============================================================================
+# Admin
+
+migrate:
+	go run ./cmd/admin -action="migrate"
+
+seed: migrate
+	go run ./cmd/admin -action="seed"
