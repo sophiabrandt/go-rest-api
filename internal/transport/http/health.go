@@ -1,21 +1,23 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"github.com/sophiabrandt/go-rest-api/internal/adapter/database"
 	"github.com/sophiabrandt/go-rest-api/internal/env"
 )
 
+// Health checks if the service is available and database is up.
 func Health(e *env.Env, w http.ResponseWriter, r *http.Request) error {
 	status := "ok"
 	statusCode := http.StatusOK
+	if err := database.StatusCheck(e.DB); err != nil {
+		status = "db not ready"
+		statusCode = http.StatusInternalServerError
+	}
 	health := struct {
 		Status string `json:"status`
 	}{Status: status}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(health)
-	return nil
+	return Respond(e, w, health, statusCode)
 }

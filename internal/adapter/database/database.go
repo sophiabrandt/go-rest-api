@@ -17,3 +17,11 @@ func New() (*sqlx.DB, error) {
 	}
 	return db, nil
 }
+
+// StatusCheck pings the database to see if it's reachable..
+func StatusCheck(db *sqlx.DB) error {
+	if err := db.Ping(); err != nil {
+		return errors.Wrap(err, "Unable to ping database")
+	}
+	return nil
+}
