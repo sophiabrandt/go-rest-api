@@ -10,7 +10,6 @@ import (
 
 // New creates a new router with all application routes.
 func New(e *env.Env) http.Handler {
-
 	bg := bookGroup{
 		book: book.New(e.DB),
 	}

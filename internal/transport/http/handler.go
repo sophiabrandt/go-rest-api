@@ -65,12 +65,12 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // use wraps middleware around handlers.
 func use(h handler, middleware ...func(http.Handler) http.Handler) http.Handler {
-    var res http.Handler = h
-    for _, m := range middleware {
-        res = m(res)
-    }
+	var res http.Handler = h
+	for _, m := range middleware {
+		res = m(res)
+	}
 
-    return res
+	return res
 }
 
 // Respond answers the client with JSON.

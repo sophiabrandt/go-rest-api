@@ -7,6 +7,5 @@ require (
 	github.com/dimiro1/darwin v0.0.0-20191008194338-370f81775d3b
 	github.com/jmoiron/sqlx v1.3.1
 	github.com/pkg/errors v0.9.1
-	github.com/zenazn/goji v1.0.1
 	modernc.org/sqlite v1.8.7
 )
