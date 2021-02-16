@@ -37,14 +37,14 @@ type ErrorResponse struct {
 	Code  int    `json:"status_code"`
 }
 
-// Handler takes a configured Env.
-type Handler struct {
+// handler takes a configured Env.
+type handler struct {
 	E *env.Env
 	H func(E *env.Env, w http.ResponseWriter, r *http.Request) error
 }
 
 // ServeHTTP allows the Handler to satisy the http.Handler interface.
-func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err := h.H(h.E, w, r)
 	if err != nil {
 		switch e := err.(type) {
@@ -61,6 +61,16 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Respond(h.E, w, response, http.StatusInternalServerError)
 		}
 	}
+}
+
+// use wraps middleware around handlers.
+func use(h handler, middleware ...func(http.Handler) http.Handler) http.Handler {
+    var res http.Handler = h
+    for _, m := range middleware {
+        res = m(res)
+    }
+
+    return res
 }
 
 // Respond answers the client with JSON.

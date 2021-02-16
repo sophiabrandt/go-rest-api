@@ -7,8 +7,8 @@ import (
 	"github.com/sophiabrandt/go-rest-api/internal/env"
 )
 
-// Health checks if the service is available and database is up.
-func Health(e *env.Env, w http.ResponseWriter, r *http.Request) error {
+// health checks if the service is available and database is up.
+func health(e *env.Env, w http.ResponseWriter, r *http.Request) error {
 	status := "ok"
 	statusCode := http.StatusOK
 	if err := database.StatusCheck(e.DB); err != nil {
