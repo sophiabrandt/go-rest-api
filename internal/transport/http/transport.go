@@ -15,6 +15,12 @@ type Error interface {
 	Status() int
 }
 
+// ErrorResponse is the client response struct for errors.
+type ErrorResponse struct {
+	Error  string   `json:"error"`
+	Fields []string `json:"fields,omitempty"`
+}
+
 // StatusError represents an error with an associated HTTP status code.
 type StatusError struct {
 	Err  error
@@ -29,12 +35,6 @@ func (se StatusError) Error() string {
 // Returns our HTTP status code.
 func (se StatusError) Status() int {
 	return se.Code
-}
-
-// ErrorResponse is the client response struct for errors.
-type ErrorResponse struct {
-	Error string `json:"error"`
-	Code  int    `json:"status_code"`
 }
 
 // handler takes a configured Env.
@@ -52,13 +52,13 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// We can retrieve the status here and write out a specific
 			// HTTP status code.
 			h.E.Log.Printf("HTTP %d - %s", e.Status(), e)
-			response := ErrorResponse{Error: e.Error(), Code: e.Status()}
-			Respond(h.E, w, response, e.Status())
+			response := ErrorResponse{e.Error(), nil}
+			respond(h.E, w, response, e.Status())
 		default:
 			// Any error types we don't specifically look out for default
 			// to serving a HTTP 500
-			response := ErrorResponse{Error: http.StatusText(http.StatusInternalServerError), Code: http.StatusInternalServerError}
-			Respond(h.E, w, response, http.StatusInternalServerError)
+			response := ErrorResponse{http.StatusText(http.StatusInternalServerError), nil}
+			respond(h.E, w, response, http.StatusInternalServerError)
 		}
 	}
 }
@@ -73,8 +73,8 @@ func use(h handler, middleware ...func(http.Handler) http.Handler) http.Handler 
 	return res
 }
 
-// Respond answers the client with JSON.
-func Respond(e *env.Env, w http.ResponseWriter, data interface{}, statusCode int) error {
+// respond answers the client with JSON.
+func respond(e *env.Env, w http.ResponseWriter, data interface{}, statusCode int) error {
 	// If there is nothing to marshal then set status code and return.
 	if statusCode == http.StatusNoContent {
 		w.WriteHeader(statusCode)

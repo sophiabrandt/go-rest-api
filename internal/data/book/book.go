@@ -8,7 +8,7 @@ import (
 
 // BookRepositoryDb defines the repository for the book service.
 type RepositoryDb struct {
-	DB *sqlx.DB
+	Db *sqlx.DB
 }
 
 // Repo is the interface for the book repository.
@@ -19,7 +19,7 @@ type Repo interface {
 
 // New returns a pointer to a book repo.
 func New(db *sqlx.DB) *RepositoryDb {
-	return &RepositoryDb{DB: db}
+	return &RepositoryDb{Db: db}
 }
 
 // Query retrieves all books from the database.
@@ -34,7 +34,7 @@ func (r *RepositoryDb) Query() ([]Info, error) {
 	ORDER BY b.book_id
 	`
 	books := []Info{}
-	if err := r.DB.Select(&books, q); err != nil {
+	if err := r.Db.Select(&books, q); err != nil {
 		return nil, errors.Wrap(err, "selecting books")
 	}
 	return books, nil
@@ -51,7 +51,7 @@ func (r *RepositoryDb) Create(book NewBook) (Info, error) {
 	WHERE a.name = $1
 	`
 	var author_id string
-	if err := r.DB.Get(&author_id, a_id, book.AuthorName); err != nil {
+	if err := r.Db.Get(&author_id, a_id, book.AuthorName); err != nil {
 		// author does not exist yet, create new author
 		author_id = uuid.New().String()
 
@@ -62,7 +62,7 @@ func (r *RepositoryDb) Create(book NewBook) (Info, error) {
 		($1, $2)
 		`
 
-		if _, err := r.DB.Exec(a, author_id, book.AuthorName); err != nil {
+		if _, err := r.Db.Exec(a, author_id, book.AuthorName); err != nil {
 			return Info{}, errors.Wrap(err, "selecting author for book")
 		}
 	}
@@ -84,7 +84,7 @@ func (r *RepositoryDb) Create(book NewBook) (Info, error) {
 	VALUES
 		($1, $2, $3, $4, $5, $6)`
 
-	if _, err := r.DB.Exec(q, bk.ID, bk.Title, bk.AuthorID, bk.PublishedDate, bk.ImageUrl, bk.Description); err != nil {
+	if _, err := r.Db.Exec(q, bk.ID, bk.Title, bk.AuthorID, bk.PublishedDate, bk.ImageUrl, bk.Description); err != nil {
 		return Info{}, errors.Wrap(err, "inserting book")
 	}
 

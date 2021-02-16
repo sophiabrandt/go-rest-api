@@ -13,9 +13,9 @@ type Info struct {
 
 // NewBook is the required data for creating a new book.
 type NewBook struct {
-	AuthorName    string `json:"author_name"`
-	Title         string `json:"title"`
-	PublishedDate string `json:"published_date"`
-	ImageUrl      string `json:"image_url"`
-	Description   string `json:"description"`
+	AuthorName    string `json:"author_name" validate:"required,max=255"`
+	Title         string `json:"title" validate:"required,max=255"`
+	PublishedDate string `json:"published_date" validate:"required,max=255"`
+	ImageUrl      string `json:"image_url" validate:"required,url,max=255"`
+	Description   string `json:"description" validate:"required,max=255"`
 }

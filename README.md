@@ -63,3 +63,4 @@ Apache 2.0 License, see [`LICENSE`](LICENSE).
 - [Develop A Production Ready REST API in Go](https://tutorialedge.net/courses/go-rest-api-course/)
 - [https://github.com/ardanlabs/service](https://github.com/ardanlabs/service)
 - [Graceful shutdown of Golang servers using Context and OS signals](https://archive.is/Mf0dJ)
+- [Learning Cloud Native Go](https://learning-cloud-native-go.github.io/)

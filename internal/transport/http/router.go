@@ -8,10 +8,10 @@ import (
 	"github.com/sophiabrandt/go-rest-api/internal/transport/http/middleware"
 )
 
-// New creates a new router with all application routes.
-func New(e *env.Env) http.Handler {
+// NewRouter creates a new router with all application routes.
+func NewRouter(e *env.Env) http.Handler {
 	bg := bookGroup{
-		book: book.New(e.DB),
+		book: book.New(e.Db),
 	}
 
 	r := e.Router

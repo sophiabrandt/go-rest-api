@@ -11,7 +11,7 @@ import (
 func health(e *env.Env, w http.ResponseWriter, r *http.Request) error {
 	status := "ok"
 	statusCode := http.StatusOK
-	if err := database.StatusCheck(e.DB); err != nil {
+	if err := database.StatusCheck(e.Db); err != nil {
 		status = "db not ready"
 		statusCode = http.StatusInternalServerError
 	}
@@ -19,5 +19,5 @@ func health(e *env.Env, w http.ResponseWriter, r *http.Request) error {
 		Status string `json:"status`
 	}{Status: status}
 
-	return Respond(e, w, health, statusCode)
+	return respond(e, w, health, statusCode)
 }

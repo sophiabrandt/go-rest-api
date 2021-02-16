@@ -52,10 +52,13 @@ func run(ctx context.Context, log *log.Logger) error {
 	}
 	defer db.Close()
 
-	// initialize global dependencies
-	env := env.New(log, db)
+	// validator
+	validator := transportHTTP.NewValidator()
 
-	router := transportHTTP.New(env)
+	// initialize global dependencies
+	env := env.New(log, db, validator)
+
+	router := transportHTTP.NewRouter(env)
 
 	// create server
 	srv := server.New(*addr, router)
