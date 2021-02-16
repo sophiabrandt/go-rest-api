@@ -1,6 +1,7 @@
 package book
 
 import (
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -10,20 +11,10 @@ type RepositoryDb struct {
 	DB *sqlx.DB
 }
 
-// Info is the book model.
-type Info struct {
-	ID            string `db:"book_id" json:"book_id"`
-	AuthorID      string `db:"author_id" json:"author_id,omitempty"`
-	AuthorName    string `db:"author_name" json:"author_name"`
-	Title         string `db:"title" json:"title"`
-	PublishedDate string `db:"published_date" json:"published_date"`
-	ImageUrl      string `db:"image_url" json:"image_url"`
-	Description   string `db:"description" json:"description"`
-}
-
 // Repo is the interface for the book repository.
 type Repo interface {
 	Query() ([]Info, error)
+	Create(book NewBook) (Info, error)
 }
 
 // New returns a pointer to a book repo.
@@ -47,4 +38,55 @@ func (r *RepositoryDb) Query() ([]Info, error) {
 		return nil, errors.Wrap(err, "selecting books")
 	}
 	return books, nil
+}
+
+// Create adds a new book to the database. It returns the created book with
+// fields like ID and Author_ID populated.
+func (r *RepositoryDb) Create(book NewBook) (Info, error) {
+	// find the id for the author
+	const a_id = `
+	SELECT a.author_id
+	FROM
+		authors AS a
+	WHERE a.name = $1
+	`
+	var author_id string
+	if err := r.DB.Get(&author_id, a_id, book.AuthorName); err != nil {
+		// author does not exist yet, create new author
+		author_id = uuid.New().String()
+
+		const a = `
+		INSERT INTO authors
+			(author_id, name)
+		VALUES
+		($1, $2)
+		`
+
+		if _, err := r.DB.Exec(a, author_id, book.AuthorName); err != nil {
+			return Info{}, errors.Wrap(err, "selecting author for book")
+		}
+	}
+
+	// create new book model for the database
+	bk := Info{
+		ID:            uuid.New().String(),
+		Title:         book.Title,
+		AuthorID:      author_id,
+		AuthorName:    book.AuthorName,
+		PublishedDate: book.PublishedDate,
+		ImageUrl:      book.ImageUrl,
+		Description:   book.Description,
+	}
+
+	const q = `
+	INSERT INTO books
+		(book_id, title, author_id, published_date, image_url, description)
+	VALUES
+		($1, $2, $3, $4, $5, $6)`
+
+	if _, err := r.DB.Exec(q, bk.ID, bk.Title, bk.AuthorID, bk.PublishedDate, bk.ImageUrl, bk.Description); err != nil {
+		return Info{}, errors.Wrap(err, "inserting book")
+	}
+
+	return bk, nil
 }

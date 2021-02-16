@@ -17,6 +17,7 @@ func New(e *env.Env) http.Handler {
 	r := e.Router
 	r.Handler(http.MethodGet, "/api/health", use(handler{e, health}, middleware.RequestLogger(e.Log)))
 	r.Handler(http.MethodGet, "/api/books", use(handler{e, bg.getAllBooks}, middleware.RequestLogger(e.Log)))
+	r.Handler(http.MethodPost, "/api/books", use(handler{e, bg.PostBook}, middleware.RequestLogger(e.Log)))
 
 	return r
 }
