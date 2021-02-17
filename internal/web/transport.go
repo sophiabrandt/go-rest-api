@@ -1,5 +1,5 @@
 // https://blog.questionable.services/article/http-handler-error-handling-revisited/
-package http
+package web
 
 import (
 	"encoding/json"

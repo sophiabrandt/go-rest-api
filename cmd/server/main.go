@@ -14,7 +14,7 @@ import (
 	"github.com/sophiabrandt/go-rest-api/internal/adapter/database"
 	"github.com/sophiabrandt/go-rest-api/internal/env"
 	"github.com/sophiabrandt/go-rest-api/internal/server"
-	transportHTTP "github.com/sophiabrandt/go-rest-api/internal/transport/http"
+	"github.com/sophiabrandt/go-rest-api/internal/web"
 )
 
 func main() {
@@ -53,12 +53,12 @@ func run(ctx context.Context, log *log.Logger) error {
 	defer db.Close()
 
 	// validator
-	validator := transportHTTP.NewValidator()
+	validator := web.NewValidator()
 
 	// initialize global dependencies
 	env := env.New(log, db, validator)
 
-	router := transportHTTP.NewRouter(env)
+	router := web.NewRouter(env)
 
 	// create server
 	srv := server.New(*addr, router)

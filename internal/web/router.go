@@ -1,11 +1,11 @@
-package http
+package web
 
 import (
 	"net/http"
 
 	"github.com/sophiabrandt/go-rest-api/internal/data/book"
 	"github.com/sophiabrandt/go-rest-api/internal/env"
-	"github.com/sophiabrandt/go-rest-api/internal/transport/http/middleware"
+	"github.com/sophiabrandt/go-rest-api/internal/web/middleware"
 )
 
 // NewRouter creates a new router with all application routes.
