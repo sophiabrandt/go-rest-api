@@ -29,6 +29,7 @@ type Repo interface {
 	QueryByID(bookID string) (Info, error)
 	QueryByTitle(bookTitle string) (Info, error)
 	Create(book NewBook) (Info, error)
+	Delete(bookID string) error
 }
 
 // New returns a pointer to a book repo.
@@ -76,7 +77,7 @@ func (r *RepositoryDb) QueryByID(bookID string) (Info, error) {
 		if err == sql.ErrNoRows {
 			return book, ErrNotFound
 		}
-		return book, errors.Wrap(err, "selecting book by ID")
+		return book, errors.Wrapf(err, "selecting book with ID %s", bookID)
 	}
 	return book, nil
 }
@@ -158,4 +159,23 @@ func (r *RepositoryDb) Create(book NewBook) (Info, error) {
 	}
 
 	return bk, nil
+}
+
+// Delete removes a book by ID from the database.
+func (r *RepositoryDb) Delete(bookID string) error {
+	if _, err := uuid.Parse(bookID); err != nil {
+		return ErrInvalidID
+	}
+
+	const q = `
+	DELETE FROM
+		books
+	WHERE
+		book_id = $1
+	`
+
+	if _, err := r.Db.Exec(q, bookID); err != nil {
+		return errors.Wrapf(err, "deleting book with ID %s", bookID)
+	}
+	return nil
 }

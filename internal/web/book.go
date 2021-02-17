@@ -34,24 +34,6 @@ func (bg bookGroup) getAllBooks(e *env.Env, w http.ResponseWriter, r *http.Reque
 	return respond(e, w, booksResp, http.StatusOK)
 }
 
-func (bg bookGroup) getBookByID(e *env.Env, w http.ResponseWriter, r *http.Request) error {
-	params := params(r)
-	bk, err := bg.book.QueryByID(params["id"])
-	if err != nil {
-		switch errors.Cause(err) {
-		case book.ErrInvalidID:
-			return StatusError{err, http.StatusBadRequest}
-		case book.ErrNotFound:
-			return StatusError{err, http.StatusNotFound}
-		default:
-			return errors.Wrapf(err, "ID : %s", params["id"])
-		}
-	}
-	bkResp := bk.ToDto()
-
-	return respond(e, w, bkResp, http.StatusOK)
-}
-
 func (bg bookGroup) getBookSearch(e *env.Env, w http.ResponseWriter, r *http.Request) error {
 	title, err := url.QueryUnescape(r.URL.Query().Get("title"))
 	if err != nil {
@@ -70,6 +52,24 @@ func (bg bookGroup) getBookSearch(e *env.Env, w http.ResponseWriter, r *http.Req
 	booksResp := books.ToDto()
 
 	return respond(e, w, booksResp, http.StatusOK)
+}
+
+func (bg bookGroup) getBookByID(e *env.Env, w http.ResponseWriter, r *http.Request) error {
+	params := params(r)
+	bk, err := bg.book.QueryByID(params["id"])
+	if err != nil {
+		switch errors.Cause(err) {
+		case book.ErrInvalidID:
+			return StatusError{err, http.StatusBadRequest}
+		case book.ErrNotFound:
+			return StatusError{err, http.StatusNotFound}
+		default:
+			return errors.Wrapf(err, "ID : %s", params["id"])
+		}
+	}
+	bkResp := bk.ToDto()
+
+	return respond(e, w, bkResp, http.StatusOK)
 }
 
 func (bg bookGroup) postBook(e *env.Env, w http.ResponseWriter, r *http.Request) error {
@@ -92,4 +92,19 @@ func (bg bookGroup) postBook(e *env.Env, w http.ResponseWriter, r *http.Request)
 	newBookResp := newBook.ToDto()
 
 	return respond(e, w, newBookResp, http.StatusCreated)
+}
+
+func (bg bookGroup) deleteBook(e *env.Env, w http.ResponseWriter, r *http.Request) error {
+	params := params(r)
+
+	if err := bg.book.Delete(params["id"]); err != nil {
+		switch errors.Cause(err) {
+		case book.ErrInvalidID:
+			return StatusError{err, http.StatusBadRequest}
+		default:
+			return errors.Wrapf(err, "ID : %s", params["id"])
+		}
+	}
+
+	return respond(e, w, nil, http.StatusNoContent)
 }
