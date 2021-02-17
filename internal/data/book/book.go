@@ -1,9 +1,21 @@
 package book
 
 import (
+	"database/sql"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+)
+
+var (
+	// ErrNotFound is used when a specific Product is requested but does not exist.
+	ErrNotFound = errors.New("not found")
+
+	// ErrInvalidID occurs when an ID is not in a valid form.
+	ErrInvalidID = errors.New("ID is not in its proper form")
 )
 
 // BookRepositoryDb defines the repository for the book service.
@@ -13,7 +25,9 @@ type RepositoryDb struct {
 
 // Repo is the interface for the book repository.
 type Repo interface {
-	Query() ([]Info, error)
+	Query() (Infos, error)
+	QueryByID(bookID string) (Info, error)
+	QueryByTitle(bookTitle string) (Info, error)
 	Create(book NewBook) (Info, error)
 }
 
@@ -23,7 +37,7 @@ func New(db *sqlx.DB) *RepositoryDb {
 }
 
 // Query retrieves all books from the database.
-func (r *RepositoryDb) Query() ([]Info, error) {
+func (r *RepositoryDb) Query() (Infos, error) {
 	const q = `
 	SELECT
 		b.book_id, b.title, b.published_date, b.image_url, b.description,
@@ -33,9 +47,58 @@ func (r *RepositoryDb) Query() ([]Info, error) {
 		authors AS a ON b.author_id = a.author_id
 	ORDER BY b.book_id
 	`
-	books := []Info{}
+	var books Infos
 	if err := r.Db.Select(&books, q); err != nil {
-		return nil, errors.Wrap(err, "selecting books")
+		return books, errors.Wrap(err, "selecting books")
+	}
+	return books, nil
+}
+
+// QuerybyID retrieves a book by ID from the database.
+func (r *RepositoryDb) QueryByID(bookID string) (Info, error) {
+	if _, err := uuid.Parse(bookID); err != nil {
+		return Info{}, ErrInvalidID
+	}
+
+	const q = `
+	SELECT
+		b.book_id, b.title, b.published_date, b.image_url, b.description,
+		a.name AS author_name
+	FROM books as b
+	LEFT JOIN
+		authors AS a ON b.author_id = a.author_id
+	WHERE
+		b.book_id = $1
+	`
+
+	var book Info
+	if err := r.Db.Get(&book, q, bookID); err != nil {
+		if err == sql.ErrNoRows {
+			return book, ErrNotFound
+		}
+		return book, errors.Wrap(err, "selecting book by ID")
+	}
+	return book, nil
+}
+
+// QuerybyTitle retrieves a book by quering the title from the database.
+func (r *RepositoryDb) QueryByTitle(bookTitle string) (Infos, error) {
+	const q = `
+	SELECT
+		b.book_id, b.title, b.published_date, b.image_url, b.description,
+		a.name AS author_name
+	FROM books as b
+	LEFT JOIN
+		authors AS a ON b.author_id = a.author_id
+	WHERE
+		b.title LIKE '%' || $1 || '%'
+	`
+	var books []Info
+	if err := r.Db.Select(&books, q, bookTitle); err != nil {
+		if err == sql.ErrNoRows {
+			return books, ErrNotFound
+		}
+		return books, errors.Wrap(err, "selecting book by Title")
 	}
 	return books, nil
 }
@@ -67,13 +130,19 @@ func (r *RepositoryDb) Create(book NewBook) (Info, error) {
 		}
 	}
 
+	pubDate, err := time.Parse("2006-01-02", book.PublishedDate)
+	if err != nil {
+		return Info{}, errors.Wrap(err, "parsing date format for published_date")
+	}
+	dateString := pubDate.Format("2006-01-02")
+
 	// create new book model for the database
 	bk := Info{
 		ID:            uuid.New().String(),
-		Title:         book.Title,
 		AuthorID:      author_id,
-		AuthorName:    book.AuthorName,
-		PublishedDate: book.PublishedDate,
+		AuthorName:    strings.ToLower(book.AuthorName),
+		Title:         strings.ToLower(book.Title),
+		PublishedDate: dateString,
 		ImageUrl:      book.ImageUrl,
 		Description:   book.Description,
 	}
@@ -85,7 +154,7 @@ func (r *RepositoryDb) Create(book NewBook) (Info, error) {
 		($1, $2, $3, $4, $5, $6)`
 
 	if _, err := r.Db.Exec(q, bk.ID, bk.Title, bk.AuthorID, bk.PublishedDate, bk.ImageUrl, bk.Description); err != nil {
-		return Info{}, errors.Wrap(err, "inserting book")
+		return bk, errors.Wrap(err, "inserting book")
 	}
 
 	return bk, nil

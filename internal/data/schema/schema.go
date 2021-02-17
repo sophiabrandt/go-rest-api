@@ -30,7 +30,7 @@ var migrations = []darwin.Migration{
 CREATE TABLE authors (
 	author_id       UUID,
 	name            TEXT NOT NULL,
-	PRIMARY KEY (author_id)
+PRIMARY KEY (author_id)
 );`,
 	},
 	{
@@ -44,8 +44,12 @@ CREATE TABLE books (
 	published_date  TIMESTAMP,
 	image_url       TEXT,
 	description     TEXT,
-	PRIMARY KEY (book_id),
-	FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
-);`,
+PRIMARY KEY (book_id),
+FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX idx_book_title
+ON books(title)
+;
+`,
 	},
 }

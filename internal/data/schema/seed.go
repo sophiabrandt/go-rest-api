@@ -31,13 +31,13 @@ func Seed(db *sqlx.DB) error {
 const seeds = `
 -- Create authors and books
 INSERT INTO authors (author_id, name) VALUES
-	('bbc79841-7feb-4944-9971-07404558dfdd', 'J.R.R.Tolkien'),
-	('6ae4a9bf-0bff-40d5-9dbc-ce93819f4208', 'Jane Austen')
+	('bbc79841-7feb-4944-9971-07404558dfdd', 'j.r.r.tolkien'),
+	('6ae4a9bf-0bff-40d5-9dbc-ce93819f4208', 'jane austen')
 	ON CONFLICT DO NOTHING;
 
 INSERT INTO books (book_id, title, author_id, published_date, image_url, description) VALUES
-	('5cf37266-3473-4006-984f-9325122678b7', 'The Lord of the Rings', 'bbc79841-7feb-4944-9971-07404558dfdd', '1954-07-29 00:00:00', 'https://source.unsplash.com/random/300x300', 'High Fantasy novel'),
-	('45b5fbd3-755f-4379-8f07-a58d4a30fa2f', 'Pride and Prejudice', '6ae4a9bf-0bff-40d5-9dbc-ce93819f4208', '1813-01-28 00:00:00', 'https://source.unsplash.com/random/300x300', 'Romantic novel of manners')
+	('5cf37266-3473-4006-984f-9325122678b7', 'the lord of the rings', 'bbc79841-7feb-4944-9971-07404558dfdd', '1954-07-29 00:00:00', 'https://source.unsplash.com/random/300x300', 'high fantasy novel'),
+	('45b5fbd3-755f-4379-8f07-a58d4a30fa2f', 'pride and prejudice', '6ae4a9bf-0bff-40d5-9dbc-ce93819f4208', '1813-01-28 00:00:00', 'https://source.unsplash.com/random/300x300', 'romantic novel of manners')
 	ON CONFLICT DO NOTHING;
 `
 
